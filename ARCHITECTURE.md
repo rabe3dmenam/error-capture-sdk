@@ -38,16 +38,22 @@ One file per error type, each implementing `Classifier` (`matches()` + `classify
 against `/types` only. Classifiers never import `/core`, `/sdk`, or each other —
 enforced by `.dependency-cruiser.cjs`.
 
+**Free core (this repo):**
+
 | File | Detects |
 |---|---|
 | `missing-dependency.ts` | A bare package specifier that couldn't be resolved (tsc, plain Node `require`). |
 | `module-not-found.ts` | A relative/absolute import path that couldn't be resolved. |
-| `type-error.ts` | A TypeScript semantic diagnostic (`TS2xxx`, excluding `TS2307`). |
 | `syntax-error.ts` | Invalid syntax (`TS1xxx`, or a plain Node `SyntaxError`). |
-| `install-failure.ts` | `npm install` failing for an install-specific reason (whitelisted npm error codes only — see `DECISIONS.md` for why). |
-| `port-in-use.ts` | `EADDRINUSE`. |
 | `command-not-found.ts` | A shell command/binary that doesn't exist. |
 | `index.ts` | The registered classifier list the core pipeline runs. The one file in this folder allowed to import its siblings — building this list is its whole job. |
+
+**Paid tier (separate, private `error-capture-sdk-pro` package — not in this repo):**
+`type-error.ts` (TypeScript semantic diagnostics), `install-failure.ts` (`npm
+install` failures), `port-in-use.ts` (`EADDRINUSE`). These implement the exact same
+`Classifier` shape against this package's exported `RawResult`/`StructuredError`
+types and compose on top of the free core's `capture()`/`analyze()` output — no
+changes to this package's architecture were made to support that.
 
 `unknown_error` (ERROR_SCHEMA.md section 4.8) is **not** a classifier file — it's the
 registry's built-in fallback (`src/core/unknown-error.ts`), guaranteeing every failed
@@ -112,14 +118,15 @@ flowchart TD
     REG -->|"nothing matched<br/>AND command failed"| FALLBACK
     REG -->|"command succeeded"| EMPTY["errors: []"]
 
-    subgraph CLASSIFIERS ["src/classifiers — pluggable detectors"]
-        CLASSIFY["missing_dependency · module_not_found · type_error<br/>syntax_error · install_failure · port_in_use · command_not_found"]
+    subgraph CLASSIFIERS ["src/classifiers — pluggable detectors (free core)"]
+        CLASSIFY["missing_dependency · module_not_found<br/>syntax_error · command_not_found"]
     end
 
     CLASSIFY --> BUILD
     FALLBACK --> BUILD
     EMPTY --> BUILD
-    BUILD --> RESULT["CaptureResult<br/>(ERROR_SCHEMA.md section 2)"]
+    BUILD --> RESULT["CaptureResult<br/>(this package's public types)"]
+    RESULT -.->|"optional: error-capture-sdk-pro<br/>composes type_error · install_failure · port_in_use<br/>on top, via the same Classifier shape"| PRORESULT["CaptureResult<br/>(free + paid errors merged)"]
 ```
 
 **Why there's no separate "parse" box:** each classifier's `classify()` does its own
