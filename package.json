@@ -21,9 +21,7 @@
   },
   "files": [
     "dist",
-    "ERROR_SCHEMA.md",
     "ARCHITECTURE.md",
-    "DECISIONS.md",
     "docs"
   ],
   "engines": {
