@@ -1,6 +1,6 @@
 {
   "name": "error-capture-sdk",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Turns raw stdout/stderr/exit-code noise from Node.js commands into a predictable, structured CaptureResult an AI coding agent can act on.",
   "keywords": [
     "ai-agent",
