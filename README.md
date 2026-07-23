@@ -119,8 +119,7 @@ interface CaptureOptions {
 }
 ```
 
-Kept deliberately minimal — every option is a maintenance cost (`SDK_API.md`
-section 4).
+Kept deliberately minimal — every option is a maintenance cost.
 
 ## Supported error types (free core)
 
@@ -139,6 +138,16 @@ Every `StructuredError` always has the same shape (`type`, `summary`, `file`,
 `line`, `column`, `details`, `suggestedFix`, `confidence`, `classifier`,
 `rawExcerpt`) regardless of type — `null` means "unknown," fields are never
 omitted, whether it came from a free or a paid classifier.
+
+## Pro
+
+The free core covers the highest-frequency failures. An optional **Pro** package
+composes on top of it using the exact same `capture()`/`analyze()` API — no
+architecture change, nothing new to learn.
+
+- Adds three more classifiers: `type_error`, `install_failure`, `port_in_use`.
+- Additional language/runtime support (Python, Go) is planned for Pro.
+- Not yet publicly available — watch this repo or reach out if you're interested.
 
 ## Types
 
