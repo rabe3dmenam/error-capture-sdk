@@ -100,6 +100,36 @@ describe("missingDependencyClassifier", () => {
     expect(errors[1]).toMatchObject({ details: { package: "axios" }, file: "/Users/dev/project/src/b.js" });
   });
 
+  it("matches Node's ESM loader ERR_MODULE_NOT_FOUND form and extracts the package name", () => {
+    const stderr = [
+      "node:internal/modules/esm/resolve:257",
+      "  let hasEsmModule;",
+      "        ^",
+      "",
+      "Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'axios' imported from /Users/dev/project/src/index.js",
+      "    at packageResolve (node:internal/modules/esm/resolve:837:9)",
+      "    at moduleResolve (node:internal/modules/esm/resolve:1367:20)",
+      "",
+      "Node.js v20.11.0",
+    ].join("\n");
+    const input = rawResult({ stderr });
+
+    expect(missingDependencyClassifier.matches(input)).toBe(true);
+    const [error] = missingDependencyClassifier.classify(input);
+
+    expect(error).toMatchObject({
+      type: "missing_dependency",
+      summary: "Module 'axios' is not installed",
+      file: "/Users/dev/project/src/index.js",
+      line: null,
+      column: null,
+      details: { package: "axios" },
+      suggestedFix: "npm install axios",
+      classifier: "missing_dependency@1",
+      proHint: null,
+    });
+  });
+
   it("does not match a relative import path (that's module_not_found's job)", () => {
     const input = rawResult({
       stderr: "src/index.ts:1:1 - error TS2307: Cannot find module './utils/helpers' or its corresponding type declarations.",

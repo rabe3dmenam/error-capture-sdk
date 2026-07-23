@@ -47,6 +47,7 @@ function toStructuredError(match: ParsedMatch): StructuredError {
     confidence: 0.85,
     classifier: "command_not_found@1",
     rawExcerpt: match.rawExcerpt,
+    proHint: null,
   };
 }
 

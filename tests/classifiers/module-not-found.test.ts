@@ -73,6 +73,24 @@ describe("moduleNotFoundClassifier", () => {
     expect(errors[1]).toMatchObject({ details: { importPath: "./b" }, file: "/Users/dev/project/src/y.js" });
   });
 
+  it("matches Node's ESM loader ERR_MODULE_NOT_FOUND form for a relative/resolved path", () => {
+    const stderr = [
+      "Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/Users/dev/project/src/utils.js' imported from /Users/dev/project/src/index.js",
+      "    at moduleResolve (node:internal/modules/esm/resolve:1367:20)",
+    ].join("\n");
+    const input = rawResult({ stderr });
+
+    expect(moduleNotFoundClassifier.matches(input)).toBe(true);
+    const [error] = moduleNotFoundClassifier.classify(input);
+
+    expect(error).toMatchObject({
+      type: "module_not_found",
+      details: { importPath: "/Users/dev/project/src/utils.js" },
+      file: "/Users/dev/project/src/index.js",
+      proHint: null,
+    });
+  });
+
   it("does not match a bare package specifier (that's missing_dependency's job)", () => {
     const input = rawResult({
       stderr: "src/index.ts:1:1 - error TS2307: Cannot find module 'axios' or its corresponding type declarations.",

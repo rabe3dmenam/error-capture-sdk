@@ -1,4 +1,5 @@
 import type { RawResult, StructuredError } from "../types/index.js";
+import { buildProHint } from "./pro-hint.js";
 
 const EXCERPT_MAX_LENGTH = 500;
 
@@ -33,5 +34,6 @@ export function buildUnknownError(input: RawResult): StructuredError {
     confidence: 0.2,
     classifier: "unknown_error@1",
     rawExcerpt: source.slice(0, EXCERPT_MAX_LENGTH),
+    proHint: buildProHint(`${input.stdout}\n${input.stderr}`),
   };
 }

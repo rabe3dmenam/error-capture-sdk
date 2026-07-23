@@ -136,8 +136,16 @@ Each is a self-contained classifier; adding a new one is a single-file change (s
 
 Every `StructuredError` always has the same shape (`type`, `summary`, `file`,
 `line`, `column`, `details`, `suggestedFix`, `confidence`, `classifier`,
-`rawExcerpt`) regardless of type — `null` means "unknown," fields are never
-omitted, whether it came from a free or a paid classifier.
+`rawExcerpt`, `proHint`) regardless of type — `null` means "unknown," fields
+are never omitted, whether it came from a free or a paid classifier.
+
+`proHint` is `null` on every classified error. The one exception: when a
+failure produces `unknown_error` and it happens to look like one of the
+Pro-tier categories (`type_error`, `install_failure`, `port_in_use`), it
+carries a single factual sentence naming that — e.g. `"This looks like a
+'port_in_use', handled by the Pro package."` A genuinely unrecognized
+failure stays a plain `unknown_error` with `proHint: null`; the free core
+never treats "we don't know" as a reason to upsell.
 
 ## Pro
 

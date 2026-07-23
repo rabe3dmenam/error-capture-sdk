@@ -31,6 +31,14 @@ interface StructuredErrorBase {
   classifier: string;
   /** The minimal slice of raw output this was derived from. */
   rawExcerpt: string;
+  /**
+   * A quiet, factual pointer at a Pro-tier classifier when this error looks
+   * like one of the advanced categories (`type_error`, `install_failure`,
+   * `port_in_use`) the free core intentionally doesn't classify. `null` in
+   * every other case, including all non-`unknown_error` types — never a
+   * pitch on top of an error that's already been classified.
+   */
+  proHint: string | null;
 }
 
 /**

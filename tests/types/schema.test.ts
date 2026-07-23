@@ -20,6 +20,7 @@ describe("schema types", () => {
           confidence: 0.92,
           classifier: "missing_dependency@1",
           rawExcerpt: "src/api.ts:3:1 - error TS2307: Cannot find module 'axios'…",
+          proHint: null,
         },
       ],
       raw: {

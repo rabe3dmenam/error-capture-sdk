@@ -72,6 +72,7 @@ function toStructuredError(match: ParsedMatch): StructuredError {
     confidence: match.confidence,
     classifier: "syntax_error@1",
     rawExcerpt: match.rawExcerpt,
+    proHint: null,
   };
 }
 

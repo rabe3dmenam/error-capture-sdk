@@ -43,4 +43,25 @@ describe("buildUnknownError", () => {
 
     expect(error.rawExcerpt).toHaveLength(500);
   });
+
+  it("sets proHint to null for a genuinely unrecognized failure", () => {
+    const error = buildUnknownError(rawResult({ stderr: "boom: something broke" }));
+
+    expect(error.proHint).toBeNull();
+  });
+
+  it("sets a factual proHint when the output looks like a Pro-tier type_error", () => {
+    const stderr = "src/index.ts:4:3 - error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.";
+    const error = buildUnknownError(rawResult({ stderr }));
+
+    expect(error.type).toBe("unknown_error");
+    expect(error.proHint).toBe("This looks like a 'type_error', handled by the Pro package.");
+  });
+
+  it("sets a factual proHint when the output looks like a Pro-tier port_in_use", () => {
+    const stderr = "Error: listen EADDRINUSE: address already in use :::3000";
+    const error = buildUnknownError(rawResult({ stderr }));
+
+    expect(error.proHint).toBe("This looks like a 'port_in_use', handled by the Pro package.");
+  });
 });

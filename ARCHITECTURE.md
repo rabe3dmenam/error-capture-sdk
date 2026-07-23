@@ -26,7 +26,7 @@ no imports from anywhere else in `src`. This is enforced by `.dependency-cruiser
 |---|---|
 | `error-type.ts` | The closed 8-value `ErrorType` union. |
 | `error-details.ts` | The type-specific `details` shape for each `ErrorType`. |
-| `structured-error.ts` | `StructuredError` — a discriminated union on `type`, so `details` narrows per-type with no casting. |
+| `structured-error.ts` | `StructuredError` — a discriminated union on `type`, so `details` narrows per-type with no casting. Also carries `proHint: string \| null` — always `null` except sometimes on `unknown_error`. |
 | `raw-result.ts` | `RawResult` — unclassified command output (`command`, `exitCode`, `stdout`, `stderr`, optional `durationMs`). |
 | `capture-result.ts` | `CaptureResult` — the SDK's single, always-the-same-shape return value. |
 | `options.ts` | `CaptureOptions` and `AnalyzeOptions`. |
@@ -67,7 +67,8 @@ The capture → classify → output pipeline itself. May depend on `/types` and
 | File | Responsibility |
 |---|---|
 | `registry.ts` | `runClassifiers()` — runs every classifier's `matches()` then `classify()`, flattens results, and enforces the schema invariant that `errors` is `[]` whenever the command succeeded, regardless of what a classifier produced. |
-| `unknown-error.ts` | `buildUnknownError()` — the fallback `StructuredError` for a failed command nothing else matched. |
+| `unknown-error.ts` | `buildUnknownError()` — the fallback `StructuredError` for a failed command nothing else matched. Attaches `proHint` via `pro-hint.ts`. |
+| `pro-hint.ts` | `buildProHint()` — a lightweight, best-effort pattern check (not the Pro classification logic itself) for whether an `unknown_error` looks like a Pro-tier category, used only to populate `StructuredError.proHint`. |
 | `build-capture-result.ts` | `buildCaptureResult()` — assembles the final `CaptureResult` from a `RawResult` and its classified errors. |
 | `pipeline.ts` | `analyzeRawResult()` — wires the above together: classify, then build. This is the one function both `analyze()` and `capture()` share, so the classify logic is never duplicated. |
 

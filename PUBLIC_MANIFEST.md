@@ -14,6 +14,7 @@ src/index.ts
 src/core/build-capture-result.ts
 src/core/index.ts
 src/core/pipeline.ts
+src/core/pro-hint.ts
 src/core/registry.ts
 src/core/unknown-error.ts
 
@@ -48,6 +49,7 @@ src/classifiers/syntax-error.ts
 ```
 tests/types/schema.test.ts
 
+tests/core/pro-hint.test.ts
 tests/core/registry.test.ts
 tests/core/unknown-error.test.ts
 

@@ -24,6 +24,7 @@ function fakeError(overrides: Partial<StructuredError> = {}): StructuredError {
     confidence: 0.9,
     classifier: "fake@1",
     rawExcerpt: "fake",
+    proHint: null,
     ...overrides,
   } as StructuredError;
 }

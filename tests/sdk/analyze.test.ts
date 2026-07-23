@@ -51,4 +51,29 @@ describe("analyze", () => {
 
     expect(result.raw).toEqual({ stdout: "some output", stderr: "some error" });
   });
+
+  it("classifies Node's ESM ERR_MODULE_NOT_FOUND form as missing_dependency, not unknown_error", () => {
+    const stderr = "Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'axios' imported from /Users/dev/project/src/index.js";
+    const result = analyze(rawResult({ stderr }));
+
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]).toMatchObject({ type: "missing_dependency", details: { package: "axios" }, proHint: null });
+  });
+
+  it("attaches a proHint to unknown_error for a Pro-tier-shaped failure nothing free classifies", () => {
+    const stderr = "src/index.ts:4:3 - error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.";
+    const result = analyze(rawResult({ stderr }));
+
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]?.type).toBe("unknown_error");
+    expect(result.errors[0]?.proHint).toBe("This looks like a 'type_error', handled by the Pro package.");
+  });
+
+  it("leaves proHint null on unknown_error for a genuinely unrecognized failure", () => {
+    const result = analyze(rawResult({ stderr: "boom: something broke" }));
+
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]?.type).toBe("unknown_error");
+    expect(result.errors[0]?.proHint).toBeNull();
+  });
 });

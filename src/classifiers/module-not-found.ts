@@ -7,8 +7,11 @@ import type { Classifier, RawResult, StructuredError } from "../types/index.js";
  * diagnostic formats: the "pretty" one (only emitted with --pretty or a
  * real TTY) and the plain default it actually uses when run
  * non-interactively — which is how capture() always invokes commands, via
- * a piped child_process, never a TTY. Mirrors missing-dependency.ts's
- * parsing shape; kept as a separate, self-contained file per the
+ * a piped child_process, never a TTY. Also handles Node's ESM loader form:
+ * `Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/abs/path.js' imported
+ * from /path/to/file.js` — distinct wording ("module", not "package") from
+ * the ESM loader's missing_dependency equivalent, see missing-dependency.ts.
+ * Mirrors missing-dependency.ts's parsing shape; kept as a separate, self-contained file per the
  * classifier-isolation boundary (dependency-cruiser forbids classifiers
  * importing each other) — see DECISIONS.md.
  */
@@ -19,6 +22,7 @@ const TS_DIAGNOSTIC_PLAIN = /^(.+)\((\d+),(\d+)\): error TS2307: Cannot find mod
 // found via a separate global scan — with two require failures in one
 // capture, a second scan would always re-find the first stack block.
 const NODE_REQUIRE_ERROR = /^Error: Cannot find module '([^']+)'(?:\nRequire stack:\n- (.+))?$/gm;
+const ESM_MODULE_NOT_FOUND = /^Error \[ERR_MODULE_NOT_FOUND\]: Cannot find module '([^']+)' imported from (.+)$/gm;
 
 interface ParsedMatch {
   importPath: string;
@@ -64,6 +68,19 @@ function findMatches(input: RawResult): ParsedMatch[] {
     });
   }
 
+  for (const match of output.matchAll(ESM_MODULE_NOT_FOUND)) {
+    const [rawExcerpt, importPath, file] = match;
+    if (importPath === undefined || file === undefined || !isRelativeSpecifier(importPath)) continue;
+    matches.push({
+      importPath,
+      file: file.trim(),
+      line: null,
+      column: null,
+      rawExcerpt: rawExcerpt.trim(),
+      confidence: 0.8,
+    });
+  }
+
   return matches;
 }
 
@@ -79,6 +96,7 @@ function toStructuredError(match: ParsedMatch): StructuredError {
     confidence: match.confidence,
     classifier: "module_not_found@1",
     rawExcerpt: match.rawExcerpt,
+    proHint: null,
   };
 }
 
