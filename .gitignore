@@ -1,3 +1,19 @@
+# Internal docs — never publish (SPLIT_INSTRUCTIONS.md section 3)
+_internal/
+PROJECT BRIEF.md
+ERROR_SCHEMA.md
+SDK_API.md
+ROADMAP.md
+PROGRESS.md
+DECISIONS.md
+GO_TO_MARKET.md
+SPLIT_INSTRUCTIONS.md
+
+# Pro code — never in the public repo
+**/classifiers/pro/
+error-capture-sdk-pro/
+
+# Standard
 node_modules/
 dist/
 coverage/
